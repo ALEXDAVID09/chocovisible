@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './AsistenteIA.css';
 
-const API_IA = 'http://localhost:3000/api/ia/chat';
+const API_IA = 'https://chocovisible-backend.onrender.com/api/ia/chat';
 
 export default function AsistenteIA({ onFillForm }) {
   const [open, setOpen] = useState(false);

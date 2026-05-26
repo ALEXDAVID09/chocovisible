@@ -568,7 +568,7 @@ export default function ConsultarDenuncia() {
       // Llama a tu backend/API. Ajusta la URL según tu configuración.
 const codigoLimpio = codigo.replace(/-/g, '').trim().toUpperCase();
 
-const res = await fetch(`http://localhost:3000/api/denuncias/seguimiento/${codigoLimpio}`, {
+const res = await fetch(`https://chocovisible-backend.onrender.com/api/denuncias/seguimiento/${codigoLimpio}`, {
   method: 'GET',
 });
       if (!res.ok) throw new Error('Error del servidor');

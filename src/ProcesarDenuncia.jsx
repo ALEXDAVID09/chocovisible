@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './NuevaDenuncia.css';
 
-const API_URL = 'http://localhost:3000/api/denuncias';
+const API_URL = 'https://chocovisible-backend.onrender.com/api/denuncias';
 
 function formatearFecha(iso) {
   if (!iso) return '—';
