@@ -9,7 +9,7 @@ import "./Admin.css";
 /* ════════════════════════════════════════════════════════
    CONFIGURACIÓN — ajusta esta URL a tu backend
 ════════════════════════════════════════════════════════ */
-const API_BASE = "/api"; // cambia a la URL de tu backend PHP
+const API_BASE = "https://chocovisible-backend.onrender.com/api";// cambia a la URL de tu backend PHP
 
 /* ════════════════════════════════════════════════════════
    HELPERS
