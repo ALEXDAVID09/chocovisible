@@ -1,0 +1,191 @@
+/* ══════════════════════════════════════════════════════════
+   ADICIONES PARA ProcesarDenuncia.jsx
+   Pega este bloque AL FINAL de NuevaDenuncia.css
+   (o crea un archivo ProcesarDenuncia.css e impórtalo
+    en ProcesarDenuncia.jsx junto a NuevaDenuncia.css)
+══════════════════════════════════════════════════════════ */
+
+/* ── Card resultado (éxito/error) ── */
+.result-card {
+  background: var(--cv-white);
+  border: 1px solid var(--cv-border);
+  border-radius: var(--cv-radius);
+  overflow: hidden;
+  box-shadow: var(--cv-shadow-lg);
+}
+
+/* Cabecera éxito */
+.card-head {
+  padding: 22px 28px;
+  background: linear-gradient(135deg, var(--cv-blue), var(--cv-blue-mid) 50%, var(--cv-green) 100%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-head-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff; flex-shrink: 0;
+}
+.card-head h4 { color: #fff; font-size: 17px; font-weight: 700; margin: 0; }
+.card-head p  { color: rgba(255,255,255,.7); font-size: 13px; margin: 2px 0 0; }
+
+/* Cabecera error */
+.card-head-error {
+  padding: 22px 28px;
+  background: linear-gradient(135deg, #7F1D1D, #DC2626);
+  display: flex; align-items: center; gap: 12px;
+}
+
+/* Cuerpo */
+.card-body-cv { padding: 28px; }
+
+/* ── Código de seguimiento ── */
+.tracking-wrap {
+  background: linear-gradient(135deg, var(--cv-blue), var(--cv-green));
+  border-radius: var(--cv-radius);
+  padding: 24px 28px; text-align: center;
+  position: relative; overflow: hidden; margin-bottom: 24px;
+}
+.tracking-wrap::after {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+  animation: shine 2.8s infinite;
+}
+.tracking-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: rgba(255,255,255,.65); margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.tracking-code {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800; color: #fff; letter-spacing: 3px;
+  cursor: pointer; display: inline-block;
+  transition: transform .15s;
+}
+.tracking-code:hover { transform: scale(1.03); }
+.tracking-hint { font-size: 11.5px; color: rgba(255,255,255,.5); margin-top: 8px; }
+.btn-copy {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.25);
+  color: #fff; padding: 7px 18px; border-radius: 50px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  margin-top: 14px; transition: background .2s;
+}
+.btn-copy:hover { background: rgba(255,255,255,.25); }
+
+/* ── Info grid ── */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 20px;
+}
+@media (max-width: 576px) { .info-grid { grid-template-columns: 1fr; } }
+
+.info-box {
+  background: var(--cv-off);
+  border: 1px solid var(--cv-border);
+  border-radius: var(--cv-radius-sm);
+  padding: 14px 16px;
+}
+.info-label {
+  font-size: 11px; font-weight: 700;
+  color: var(--cv-text-muted);
+  text-transform: uppercase; letter-spacing: .5px;
+  display: flex; align-items: center; gap: 5px;
+  margin-bottom: 5px;
+}
+.info-value {
+  font-size: 14.5px; font-weight: 600; color: var(--cv-text);
+}
+.info-value.muted {
+  font-weight: 400; color: var(--cv-text-2);
+  font-size: 13.5px; line-height: 1.6;
+}
+
+/* ── Badge estado ── */
+.badge-pendiente {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #FFFBEB; color: #92400E;
+  border: 1.5px solid #FDE68A;
+  padding: 5px 14px; border-radius: 50px;
+  font-size: 13px; font-weight: 700;
+}
+
+/* ── Evidencias pill ── */
+.evidencias-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #ECFDF5; border: 1px solid #6EE7B7;
+  color: #065F46; padding: 8px 16px; border-radius: 50px;
+  font-size: 13.5px; font-weight: 600;
+}
+
+/* ── Divider ── */
+.cv-divider {
+  border: none;
+  border-top: 1px solid var(--cv-border);
+  margin: 20px 0;
+}
+
+/* ── Próximos pasos ── */
+.steps-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.steps-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 14px; color: var(--cv-text-2); line-height: 1.5;
+}
+.steps-list .step-dot {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--cv-green-mid), var(--cv-blue-mid));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #fff; font-weight: 700; margin-top: 1px;
+}
+
+/* ── Botones de resultado (distintos de los del formulario) ── */
+.btn-cv {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 50px;
+  font-size: 14px; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  border: none; transition: opacity .2s, transform .15s;
+}
+.btn-cv:hover { opacity: .88; transform: translateY(-1px); }
+.btn-cv-primary {
+  background: linear-gradient(135deg, var(--cv-green), var(--cv-blue-mid));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(26,102,54,.3);
+}
+.btn-cv-outline {
+  background: transparent;
+  color: var(--cv-green);
+  border: 2px solid var(--cv-green);
+}
+.btn-cv-outline:hover { background: var(--cv-green); color: #fff; opacity: 1; }
+
+/* ── Copy toast ── */
+.copy-toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--cv-green); color: #fff;
+  padding: 12px 20px; border-radius: var(--cv-radius-sm);
+  font-size: 14px; font-weight: 600;
+  box-shadow: var(--cv-shadow-lg);
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .3s, transform .3s;
+  pointer-events: none;
+  display: flex; align-items: center;
+}
+.copy-toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── Responsive ── */
+@media (max-width: 576px) {
+  .card-head, .card-head-error { padding: 18px 18px; }
+  .card-body-cv { padding: 18px; }
+  .tracking-wrap { padding: 20px 16px; }
+}
