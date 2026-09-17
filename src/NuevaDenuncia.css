@@ -183,7 +183,14 @@ body {
 /* ══════════════════════════════
    SIDEBAR PROGRESO
 ══════════════════════════════ */
-.row.g-4 { align-items: flex-start; }
+/* FIX: cambiado de flex-start a stretch. Con flex-start, la columna
+   izquierda (.col-lg-3) solo mide la altura de su propio contenido
+   (mucho más corto que el formulario), así que el position:sticky
+   se queda sin espacio donde "pegarse" y deja el hueco vacío al
+   seguir haciendo scroll. Con stretch, .col-lg-3 iguala la altura
+   de .col-lg-9 (el formulario), dándole al sticky todo el recorrido
+   necesario para acompañar el scroll hasta el final del formulario. */
+.row.g-4 { align-items: stretch; }
 .progress-sidebar {
     position: sticky; top: 88px;
     max-height: calc(100vh - 108px);
@@ -542,18 +549,6 @@ textarea.form-control { resize:vertical; min-height:130px; }
 .help-item p { font-size:13.5px; color: var(--cv-text-2); margin:0; line-height:1.5; }
 .help-item strong { display:block; font-size:12px; color: var(--cv-text-muted); text-transform:uppercase; letter-spacing:.3px; margin-bottom:2px; }
 
-/* ── FAB ayuda ── */
-.fab-help {
-    position:fixed; bottom:28px; right:28px; z-index:900;
-    width:54px; height:54px; border-radius:50%;
-    background: linear-gradient(135deg, var(--cv-green), var(--cv-blue-mid));
-    border:none; color:#fff; font-size:18px;
-    box-shadow: 0 6px 20px rgba(26,102,54,.35);
-    cursor:pointer; transition: transform .2s, box-shadow .2s;
-    display:flex; align-items:center; justify-content:center;
-}
-.fab-help:hover { transform:scale(1.1); box-shadow: 0 8px 28px rgba(26,102,54,.45); }
-
 /* ══════════════════════════════
    TOAST
 ══════════════════════════════ */
@@ -591,33 +586,61 @@ textarea.form-control { resize:vertical; min-height:130px; }
 .spinning { animation: spin .8s linear infinite; display:inline-block; }
 
 /* ══════════════════════════════
-   WIDGET VOZ
+   FAB UNIFICADO — Voz · Asistente IA · Ayuda
+   Un solo botón principal (tools-fab-main) despliega un
+   menú vertical (tools-fab-options) con las tres opciones.
+   Solo una herramienta permanece activa a la vez.
 ══════════════════════════════ */
-.voz-toggle-btn {
-    position: fixed; bottom: 28px; left: 28px; z-index: 1100;
-    width: 62px; height: 62px; border-radius: 50%; border: none; cursor: pointer;
-    background: linear-gradient(135deg, var(--cv-blue-mid), var(--cv-green));
-    box-shadow: 0 6px 24px rgba(19,78,155,.35);
+.tools-fab-wrap {
+    position: fixed; bottom: 28px; right: 28px; z-index: 1100;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
+}
+.tools-fab-main {
+    position: relative;
+    width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(135deg, var(--cv-green), var(--cv-blue-mid));
+    color: #fff; font-size: 20px;
+    box-shadow: 0 6px 22px rgba(26,102,54,.35);
     display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 2px;
-    transition: transform .25s, box-shadow .25s;
+    transition: transform .25s, box-shadow .25s, background .25s;
 }
-.voz-toggle-btn:hover { transform: scale(1.1); box-shadow: 0 10px 36px rgba(19,78,155,.45); }
-.voz-toggle-btn svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.voz-badge {
-    position: absolute; top: -4px; left: -4px;
-    background: var(--cv-gold-light); color: var(--cv-blue);
-    font-size: .58rem; font-weight: 800;
-    border-radius: 20px; padding: 2px 6px; white-space: nowrap;
-    letter-spacing: .3px; border: 1.5px solid var(--cv-white);
-    animation: vozBadgePulse 2s infinite;
+.tools-fab-main:hover { transform: scale(1.08); box-shadow: 0 8px 30px rgba(26,102,54,.45); }
+.tools-fab-main.open  { background: linear-gradient(135deg, var(--cv-blue), var(--cv-blue-mid)); }
+.tools-fab-main.has-active:not(.open)::after {
+    content: ''; position: absolute; top: 2px; right: 2px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--cv-gold-light); border: 2px solid #fff;
 }
-@keyframes vozBadgePulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(245,200,66,.55); }
-    50%      { box-shadow: 0 0 0 6px rgba(245,200,66,0); }
+
+.tools-fab-options {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
 }
+.tools-fab-option {
+    display: flex; align-items: center; gap: 10px;
+    border: none; cursor: pointer;
+    background: var(--cv-white); color: var(--cv-text);
+    padding: 6px 6px 6px 16px; border-radius: 50px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.16);
+    opacity: 0; transform: translateY(10px) scale(.88);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .22s cubic-bezier(.34,1.56,.64,1), background .2s;
+}
+.tools-fab-options.open .tools-fab-option { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+.tools-fab-option:hover { background: var(--cv-off); }
+.tools-fab-option.is-active { background: rgba(26,102,54,.09); }
+.tools-fab-option-label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.tools-fab-option-icon {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--cv-green), var(--cv-blue-mid));
+    color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+
+/* ══════════════════════════════
+   WIDGET VOZ (panel — el botón/badge/tooltip
+   propios se retiraron; ahora se abre desde el FAB unificado)
+══════════════════════════════ */
 .voz-panel {
-    position: fixed; bottom: 106px; left: 28px; z-index: 1099;
+    position: fixed; bottom: 100px; right: 28px; left: auto; z-index: 1099;
     width: min(360px, calc(100vw - 48px));
     border-radius: 18px;
     background: var(--cv-white);
@@ -743,44 +766,13 @@ textarea.form-control { resize:vertical; min-height:130px; }
     font-size: .67rem; color: var(--cv-text-muted);
     text-align: center; padding: 0 14px 10px;
 }
-.voz-tooltip {
-    position: fixed; bottom: 100px; left: 28px; z-index: 1098;
-    background: var(--cv-text); color: #fff;
-    font-size: 12px; font-weight: 500;
-    padding: 6px 12px; border-radius: var(--cv-radius-sm);
-    white-space: nowrap; pointer-events: none;
-    opacity: 0; transform: translateY(4px);
-    transition: opacity .2s, transform .2s;
-}
-.voz-tooltip.show { opacity: 1; transform: translateY(0); }
 
 /* ══════════════════════════════
-   ASISTENTE IA — ASIS
+   ASISTENTE IA — panel (mismo criterio: el botón
+   propio se retiró, se abre desde el FAB unificado)
 ══════════════════════════════ */
-.ai-toggle-btn {
-    position: fixed; bottom: 28px; left: 104px; z-index: 1100;
-    width: 62px; height: 62px; border-radius: 50%; border: none; cursor: pointer;
-    background: linear-gradient(135deg, var(--cv-green), var(--cv-blue-mid));
-    box-shadow: 0 6px 24px rgba(26,102,54,.38);
-    display: flex; align-items: center; justify-content: center;
-    transition: transform .25s, box-shadow .25s;
-}
-.ai-toggle-btn:hover { transform: scale(1.1); box-shadow: 0 10px 36px rgba(26,102,54,.48); }
-.ai-toggle-btn svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.ai-badge {
-    position: absolute; top: -4px; right: -4px;
-    background: var(--cv-gold-light); color: var(--cv-blue);
-    font-size: .62rem; font-weight: 800;
-    border-radius: 20px; padding: 2px 7px; white-space: nowrap;
-    animation: aiBadgePulse 2s infinite;
-    border: 1.5px solid var(--cv-white);
-}
-@keyframes aiBadgePulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(245,200,66,.55); }
-    50%      { box-shadow: 0 0 0 7px rgba(245,200,66,0); }
-}
 .ai-panel {
-    position: fixed; bottom: 106px; left: 104px; z-index: 1099;
+    position: fixed; bottom: 100px; right: 28px; left: auto; z-index: 1099;
     width: min(400px, calc(100vw - 48px));
     border-radius: 18px;
     background: var(--cv-white);
@@ -833,6 +825,7 @@ textarea.form-control { resize:vertical; min-height:130px; }
 .ai-bubble {
     padding: 9px 13px; border-radius: 14px;
     font-size: .84rem; line-height: 1.55; word-break: break-word;
+    white-space: pre-wrap;
 }
 .ai-msg.bot  .ai-bubble { background: var(--cv-off); color: var(--cv-text); border-bottom-left-radius: 4px; border: 1px solid var(--cv-border); }
 .ai-msg.user .ai-bubble { background: linear-gradient(135deg, var(--cv-green), var(--cv-blue-mid)); color: #fff; border-bottom-right-radius: 4px; }
@@ -906,16 +899,6 @@ textarea.form-control { resize:vertical; min-height:130px; }
     text-align: center; padding: 4px 12px 8px; flex-shrink: 0;
     background: var(--cv-white);
 }
-.ai-tooltip {
-    position: fixed; bottom: 100px; left: 104px; z-index: 1098;
-    background: var(--cv-text); color: #fff;
-    font-size: 12px; font-weight: 500;
-    padding: 6px 12px; border-radius: var(--cv-radius-sm);
-    white-space: nowrap; pointer-events: none;
-    opacity: 0; transform: translateY(4px);
-    transition: opacity .2s, transform .2s;
-}
-.ai-tooltip.show { opacity: 1; transform: translateY(0); }
 
 /* ══════════════════════════════
    RESPONSIVE
@@ -931,11 +914,13 @@ textarea.form-control { resize:vertical; min-height:130px; }
     .preview-footer .btn-back   { width: 100%; justify-content: center; }
 }
 @media (max-width: 480px) {
-    .voz-panel, .ai-panel { left: 12px; width: calc(100vw - 24px); }
-    .voz-toggle-btn { left: 16px; bottom: 20px; }
-    .ai-toggle-btn  { left: 90px; bottom: 20px; }
-    .voz-tooltip { left: 16px; }
-    .ai-tooltip  { left: 90px; }
+    .voz-panel, .ai-panel {
+        right: 12px; left: auto;
+        width: calc(100vw - 24px);
+        bottom: 92px;
+    }
+    .tools-fab-wrap { right: 16px; bottom: 20px; }
+    .tools-fab-option-label { max-width: 140px; white-space: normal; text-align: right; }
     .modal-dialog { margin: 0; border-radius: var(--cv-radius) var(--cv-radius) 0 0; }
     .modal-overlay { align-items: flex-end; padding: 0; }
 }

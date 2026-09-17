@@ -3,8 +3,7 @@ import './AsistenteIA.css';
 
 const API_IA = 'https://chocovisible-backend.onrender.com/api/ia/chat';
 
-export default function AsistenteIA({ onFillForm }) {
-  const [open, setOpen] = useState(false);
+export default function AsistenteIA({ onFillForm, isOpen, onClose }) {
   const [mensaje, setMensaje] = useState('');
   const [loading, setLoading] = useState(false);
   const [datosPendientes, setDatosPendientes] = useState(null);
@@ -103,7 +102,7 @@ export default function AsistenteIA({ onFillForm }) {
     ]);
 
     setDatosPendientes(null);
-    setOpen(false);
+    onClose?.();
   }
 
   function handleKeyDown(e) {
@@ -114,65 +113,57 @@ export default function AsistenteIA({ onFillForm }) {
   }
 
   return (
-    <>
-      <button
-        className="ai-toggle-btn"
-        title="Asistente IA"
-        onClick={() => setOpen(!open)}
-      >
-        <span className="ai-badge">IA</span>
-        <i className="fas fa-comment-alt" />
-      </button>
-
-      <div className={`ai-panel ${open ? 'open' : ''}`}>
-        <div className="ai-header">
-          <div className="ai-avatar">🤖</div>
-          <div>
-            <strong>Asis — Asistente IA</strong>
-            <small>ChocoVisible · Powered by OpenAI</small>
-          </div>
-          <button className="ai-close" onClick={() => setOpen(false)}>
-            ×
-          </button>
+    <div className={`ai-panel ${isOpen ? 'open' : ''}`}>
+      <div className="ai-header">
+        <div className="ai-avatar">🤖</div>
+        <div>
+          <strong>Asis — Asistente IA</strong>
+          <small>ChocoVisible · Powered by OpenAI</small>
         </div>
-
-        <div className="ai-messages" ref={messagesRef}>
-          {mensajes.map((m, index) => (
-            <div
-              key={index}
-              className={`ai-msg ${m.role === 'assistant' ? 'bot' : 'user'}`}
-            >
-              {m.content}
-            </div>
-          ))}
-
-          {loading && (
-            <div className="ai-msg bot typing">
-              Asis está escribiendo...
-            </div>
-          )}
-        </div>
-
-        {datosPendientes && (
-          <button className="ai-fill-btn" onClick={rellenarFormulario}>
-            ⚡ Rellenar formulario automáticamente
-          </button>
-        )}
-
-        <div className="ai-input-area">
-          <textarea
-            value={mensaje}
-            onChange={e => setMensaje(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Escribe tu mensaje..."
-            rows={1}
-          />
-
-          <button onClick={enviarMensaje} disabled={loading}>
-            <i className="fas fa-paper-plane" />
-          </button>
-        </div>
+        <button className="ai-close-btn" onClick={onClose}>
+          ×
+        </button>
       </div>
-    </>
+
+      <div className="ai-messages" ref={messagesRef}>
+        {mensajes.map((m, index) => (
+          <div
+            key={index}
+            className={`ai-msg ${m.role === 'assistant' ? 'bot' : 'user'}`}
+          >
+            <div className="ai-bubble">{m.content}</div>
+          </div>
+        ))}
+
+        {loading && (
+          <div className="ai-typing show">
+            <div className="ai-dots">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {datosPendientes && (
+        <button className="ai-apply-btn" onClick={rellenarFormulario} style={{ margin: '0 14px 10px' }}>
+          ⚡ Rellenar formulario automáticamente
+        </button>
+      )}
+
+      <div className="ai-input-area">
+        <textarea
+          className="ai-input"
+          value={mensaje}
+          onChange={e => setMensaje(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Escribe tu mensaje..."
+          rows={1}
+        />
+
+        <button className="ai-send-btn" onClick={enviarMensaje} disabled={loading}>
+          <i className="fas fa-paper-plane" />
+        </button>
+      </div>
+    </div>
   );
 }

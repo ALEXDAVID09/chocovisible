@@ -143,11 +143,10 @@ function Toast({ toasts, removeToast }) {
 
 /* ═══════════════════════════════════════════════════
    WIDGET DE DICTADO POR VOZ
+   (controlado desde afuera: recibe `open` y `onClose`,
+   ya no tiene su propio botón flotante)
 ═══════════════════════════════════════════════════ */
-function VozWidget({ onApply, showToast }) {
-  const [open, setOpen]         = useState(false);
-  const [showTooltip, setTip]   = useState(false);
-  const [showBadge, setBadge]   = useState(true);
+function VozWidget({ onApply, showToast, open, onClose }) {
   const [lang, setLang]         = useState('es-CO');
   const [target, setTarget]     = useState('descripcion');
   const [grabando, setGrabando] = useState(false);
@@ -227,7 +226,7 @@ function VozWidget({ onApply, showToast }) {
     if (!textoFinal.trim()) return;
     onApply(target, textoFinal.trim());
     showToast('🎤 Texto dictado aplicado al formulario', 'success');
-    setTimeout(() => setOpen(false), 800);
+    setTimeout(() => onClose?.(), 800);
   };
 
   const limpiar = () => {
@@ -236,135 +235,84 @@ function VozWidget({ onApply, showToast }) {
     if (grabando) detener();
   };
 
-  const toggleOpen = () => {
-    setTip(false); setOpen(o => !o);
-    if (!open) setBadge(false);
-  };
-
   return (
-    <>
-      <div className={`voz-tooltip${showTooltip ? ' show' : ''}`}>🎤 Dictado por voz</div>
-      <button
-        className="voz-toggle-btn"
-        title="Dictar denuncia por voz"
-        onClick={toggleOpen}
-        onMouseEnter={() => setTip(true)}
-        onMouseLeave={() => setTip(false)}
-      >
-        {showBadge && <span className="voz-badge">VOZ</span>}
-        <svg viewBox="0 0 24 24">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="8"  y1="23" x2="16" y2="23"/>
-        </svg>
-      </button>
-
-      <div className={`voz-panel${open ? ' open' : ''}`}>
-        <div className="voz-header">
-          <div className="voz-header-icon">🎤</div>
-          <div className="voz-header-info">
-            <strong>Dictado por Voz</strong>
-            <small>Habla y tu denuncia se escribe sola</small>
-          </div>
-          <button className="voz-close-btn" onClick={() => { setOpen(false); if (grabando) detener(); }}>✕</button>
+    <div className={`voz-panel${open ? ' open' : ''}`}>
+      <div className="voz-header">
+        <div className="voz-header-icon">🎤</div>
+        <div className="voz-header-info">
+          <strong>Dictado por Voz</strong>
+          <small>Habla y tu denuncia se escribe sola</small>
         </div>
-
-        {noSupport && (
-          <div className="voz-no-support">
-            ⚠️ Tu navegador no soporta dictado por voz. Usa <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong>.
-          </div>
-        )}
-
-        <div className="voz-lang-selector">
-          {[['es-CO','🇨🇴 Español'],['es-ES','🇪🇸 Castellano'],['en-US','🇺🇸 English'],['fr-FR','🇫🇷 Français']].map(([l, label]) => (
-            <button key={l} className={`voz-lang-btn${lang === l ? ' active' : ''}`}
-              onClick={() => { setLang(l); if (grabando) { detener(); setTimeout(iniciar, 300); } }}>
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="voz-target-selector">
-          <label>¿Dónde quieres escribir?</label>
-          <select className="voz-target-select" value={target} onChange={e => setTarget(e.target.value)}>
-            <option value="descripcion">📝 Descripción del incidente</option>
-            <option value="nombre">👤 Tu nombre</option>
-            <option value="direccion">📍 Dirección del lugar</option>
-            <option value="contacto">📞 Teléfono de contacto</option>
-          </select>
-        </div>
-
-        <div className={`voz-display${displayCls ? ' ' + displayCls : ''}`}>
-          {!textoFinal && !interim && <span className="voz-placeholder">Presiona "Iniciar" y comienza a hablar...</span>}
-          <span>{textoFinal}</span>
-          <span className="voz-interim">{interim}</span>
-        </div>
-
-        <div className={`voz-wave${waveShow ? ' show' : ''}`}>
-          <span/><span/><span/><span/><span/>
-        </div>
-
-        <div className={`voz-status${statusCls ? ' ' + statusCls : ''}`}>{status}</div>
-
-        <div className="voz-controls">
-          <button
-            className={`voz-start-btn${grabando ? ' grabando' : ''}`}
-            disabled={noSupport}
-            onClick={() => grabando ? detener() : iniciar()}
-          >
-            {grabando ? (
-              <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                  <rect x="6" y="6" width="12" height="12" rx="2"/>
-                </svg>
-                Detener
-              </>
-            ) : (
-              <>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                </svg>
-                Iniciar dictado
-              </>
-            )}
-          </button>
-          <button className="voz-apply-btn" disabled={!textoFinal.trim()} onClick={aplicar}>✅ Aplicar</button>
-          <button className="voz-clear-btn" onClick={limpiar}>🗑️</button>
-        </div>
-        <div className="voz-tip">🌐 Funciona mejor en Chrome · Requiere micrófono</div>
+        <button className="voz-close-btn" onClick={() => { onClose?.(); if (grabando) detener(); }}>✕</button>
       </div>
-    </>
+
+      {noSupport && (
+        <div className="voz-no-support">
+          ⚠️ Tu navegador no soporta dictado por voz. Usa <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong>.
+        </div>
+      )}
+
+      <div className="voz-lang-selector">
+        {[['es-CO','🇨🇴 Español'],['es-ES','🇪🇸 Castellano'],['en-US','🇺🇸 English'],['fr-FR','🇫🇷 Français']].map(([l, label]) => (
+          <button key={l} className={`voz-lang-btn${lang === l ? ' active' : ''}`}
+            onClick={() => { setLang(l); if (grabando) { detener(); setTimeout(iniciar, 300); } }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="voz-target-selector">
+        <label>¿Dónde quieres escribir?</label>
+        <select className="voz-target-select" value={target} onChange={e => setTarget(e.target.value)}>
+          <option value="descripcion">📝 Descripción del incidente</option>
+          <option value="nombre">👤 Tu nombre</option>
+          <option value="direccion">📍 Dirección del lugar</option>
+          <option value="contacto">📞 Teléfono de contacto</option>
+        </select>
+      </div>
+
+      <div className={`voz-display${displayCls ? ' ' + displayCls : ''}`}>
+        {!textoFinal && !interim && <span className="voz-placeholder">Presiona "Iniciar" y comienza a hablar...</span>}
+        <span>{textoFinal}</span>
+        <span className="voz-interim">{interim}</span>
+      </div>
+
+      <div className={`voz-wave${waveShow ? ' show' : ''}`}>
+        <span/><span/><span/><span/><span/>
+      </div>
+
+      <div className={`voz-status${statusCls ? ' ' + statusCls : ''}`}>{status}</div>
+
+      <div className="voz-controls">
+        <button
+          className={`voz-start-btn${grabando ? ' grabando' : ''}`}
+          disabled={noSupport}
+          onClick={() => grabando ? detener() : iniciar()}
+        >
+          {grabando ? (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <rect x="6" y="6" width="12" height="12" rx="2"/>
+              </svg>
+              Detener
+            </>
+          ) : (
+            <>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              </svg>
+              Iniciar dictado
+            </>
+          )}
+        </button>
+        <button className="voz-apply-btn" disabled={!textoFinal.trim()} onClick={aplicar}>✅ Aplicar</button>
+        <button className="voz-clear-btn" onClick={limpiar}>🗑️</button>
+      </div>
+      <div className="voz-tip">🌐 Funciona mejor en Chrome · Requiere micrófono</div>
+    </div>
   );
 }
-
-/* ═══════════════════════════════════════════════════
-const handleAsisApply = (datos) => {
-  setForm(prev => ({
-    ...prev,
-    tipo_id: datos.tipo_id ? String(datos.tipo_id) : prev.tipo_id,
-    descripcion: datos.descripcion || prev.descripcion,
-    urgencia: datos.urgencia || prev.urgencia,
-    fecha: datos.fecha || prev.fecha,
-    direccion: datos.direccion || datos.barrio || prev.direccion,
-    municipio: datos.municipio || prev.municipio,
-  }));
-
-  if (datos.tipo_id) {
-    const t = TIPOS_MOCK.find(t => t.id === Number(datos.tipo_id));
-    setSelectedTipo(t || null);
-  }
-
-  if (datos.descripcion) {
-    setCharCount(datos.descripcion.length);
-  }
-
-  showToast('🤖 Formulario rellenado con ayuda de IA', 'success');
-
-  const sec = sectionRefs.current[0];
-  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-};
 
 /* ═══════════════════════════════════════════════════
    MAIN COMPONENT
@@ -376,7 +324,11 @@ export default function NuevaDenuncia() {
   const [navOpen, setNavOpen]             = useState(false);
   const [activeStep, setActiveStep]       = useState(1);
   const [toasts, setToasts]               = useState([]);
-  const [showHelpModal, setShowHelpModal] = useState(false);
+
+  /* ── Herramientas flotantes: solo una activa a la vez ── */
+  const [activeTool, setActiveTool]       = useState(null); // 'voz' | 'ia' | 'ayuda' | null
+  const [fabOpen, setFabOpen]             = useState(false);
+
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedTipo, setSelectedTipo]   = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -403,6 +355,15 @@ export default function NuevaDenuncia() {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
   }, []);
   const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
+
+  /* ── Selección de herramienta desde el FAB unificado ──
+     Al elegir una, se cierra el menú y cualquier otra herramienta
+     que estuviera abierta (solo una activa a la vez). Tocar la misma
+     que ya está abierta la cierra. ── */
+  const handleToolSelect = (tool) => {
+    setFabOpen(false);
+    setActiveTool(prev => (prev === tool ? null : tool));
+  };
 
   /* ── Scroll navbar ── */
   useEffect(() => {
@@ -489,26 +450,26 @@ export default function NuevaDenuncia() {
   };
 
   /* ── Submit ── */
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  if (!validate()) return;
+    if (!validate()) return;
 
-  navigate('/procesar-denuncia', {
-    state: {
-      tipo_id: form.tipo_id,
-      descripcion: form.descripcion,
-      urgencia: form.urgencia || 'media',
-      fecha: form.fecha,
-      latitud: form.latitud,
-      longitud: form.longitud,
-      nombre: anonimo ? '' : form.nombre,
-      contacto: anonimo ? '' : form.contacto,
-      email: anonimo ? '' : form.email,
-      evidencias: selectedFiles.map(item => item.file),
-    },
-  });
-};
+    navigate('/procesar-denuncia', {
+      state: {
+        tipo_id: form.tipo_id,
+        descripcion: form.descripcion,
+        urgencia: form.urgencia || 'media',
+        fecha: form.fecha,
+        latitud: form.latitud,
+        longitud: form.longitud,
+        nombre: anonimo ? '' : form.nombre,
+        contacto: anonimo ? '' : form.contacto,
+        email: anonimo ? '' : form.email,
+        evidencias: selectedFiles.map(item => item.file),
+      },
+    });
+  };
 
   /* ── Voz → form ── */
   const handleVozApply = (targetField, texto) => {
@@ -526,11 +487,17 @@ const handleSubmit = (e) => {
   /* ── Asis IA → form ── */
   const handleAsisApply = (datos) => {
     if (datos.tipo_id) {
-      const t = TIPOS_MOCK.find(t => t.id === datos.tipo_id);
+      const t = TIPOS_MOCK.find(t => t.id === Number(datos.tipo_id));
       if (t) { setSelectedTipo(t); setForm(prev => ({ ...prev, tipo_id: String(t.id) })); }
     }
     if (datos.descripcion) { setForm(prev => ({ ...prev, descripcion: datos.descripcion })); setCharCount(datos.descripcion.length); }
     if (datos.urgencia)    { setForm(prev => ({ ...prev, urgencia: datos.urgencia })); }
+    if (datos.direccion || datos.barrio) { setForm(prev => ({ ...prev, direccion: datos.direccion || datos.barrio })); }
+    if (datos.municipio)   { setForm(prev => ({ ...prev, municipio: datos.municipio })); }
+    if (datos.fecha)       { setForm(prev => ({ ...prev, fecha: datos.fecha })); }
+
+    showToast('🤖 Formulario rellenado con ayuda de IA', 'success');
+
     const sec = sectionRefs.current[0];
     if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -553,7 +520,7 @@ const handleSubmit = (e) => {
           <Link to="/" className="nav-logo">
             <img src="/assets/images/chocovisibleee.png" alt="ChocoVisible" onError={e => { e.target.style.display = 'none'; }} />
             <span className="nav-logo-text">
-              <span claAssName="choco">Choco</span><span className="visible">Visible</span>
+              <span className="choco">Choco</span><span className="visible">Visible</span>
             </span>
           </Link>
           <ul className="nav-links">
@@ -624,7 +591,7 @@ const handleSubmit = (e) => {
                 <div className="quick-help">
                   <h6><i className="fas fa-life-ring" style={{ marginRight: 6 }}></i>¿Necesitas ayuda?</h6>
                   <p>Emergencias: <strong>123</strong><br />Policía: <strong>112</strong><br />Antiextorsión: <strong>165</strong></p>
-                  <button className="btn-location mt-3 w-100" style={{ borderRadius: 'var(--cv-radius-sm)' }} onClick={() => setShowHelpModal(true)}>
+                  <button className="btn-location mt-3 w-100" style={{ borderRadius: 'var(--cv-radius-sm)' }} onClick={() => handleToolSelect('ayuda')}>
                     <i className="fas fa-headset"></i> Ver más ayuda
                   </button>
                 </div>
@@ -923,16 +890,68 @@ const handleSubmit = (e) => {
         </div>
       </div>
 
-      {/* ── FAB ayuda ── */}
-      <button className="fab-help" onClick={() => setShowHelpModal(true)} title="¿Necesitas ayuda?">
-        <i className="fas fa-question"></i>
-      </button>
+      {/* ══ FAB UNIFICADO: Voz · Asistente IA · Ayuda ══
+          Un solo botón principal despliega las tres opciones.
+          Elegir una cierra el menú y cierra cualquier otra
+          herramienta que estuviera abierta (activeTool exclusivo). ══ */}
+      <div className="tools-fab-wrap">
+        <div className={`tools-fab-options${fabOpen ? ' open' : ''}`}>
+          <button
+            className={`tools-fab-option${activeTool === 'ayuda' ? ' is-active' : ''}`}
+            style={{ transitionDelay: fabOpen ? '.16s' : '0s' }}
+            onClick={() => handleToolSelect('ayuda')}
+          >
+            <span className="tools-fab-option-label">¿Necesitas ayuda?</span>
+            <span className="tools-fab-option-icon"><i className="fas fa-question"></i></span>
+          </button>
+          <button
+            className={`tools-fab-option${activeTool === 'ia' ? ' is-active' : ''}`}
+            style={{ transitionDelay: fabOpen ? '.08s' : '0s' }}
+            onClick={() => handleToolSelect('ia')}
+          >
+            <span className="tools-fab-option-label">Asistente IA</span>
+            <span className="tools-fab-option-icon"><i className="fas fa-comment-alt"></i></span>
+          </button>
+          <button
+            className={`tools-fab-option${activeTool === 'voz' ? ' is-active' : ''}`}
+            style={{ transitionDelay: fabOpen ? '0s' : '0s' }}
+            onClick={() => handleToolSelect('voz')}
+          >
+            <span className="tools-fab-option-label">Dictado por voz</span>
+            <span className="tools-fab-option-icon">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </span>
+          </button>
+        </div>
 
-      {/* ── Widget Voz ── */}
-      <VozWidget onApply={handleVozApply} showToast={showToast} />
+        <button
+          className={`tools-fab-main${fabOpen ? ' open' : ''}${activeTool ? ' has-active' : ''}`}
+          onClick={() => setFabOpen(o => !o)}
+          title="Herramientas de ayuda"
+        >
+          <i className={`fas ${fabOpen ? 'fa-times' : 'fa-life-ring'}`}></i>
+        </button>
+      </div>
 
-      {/* ── Asistente IA ── */}
-     <AsistenteIA onFillForm={handleAsisApply} />
+      {/* ── Widget Voz (controlado por activeTool) ── */}
+      <VozWidget
+        onApply={handleVozApply}
+        showToast={showToast}
+        open={activeTool === 'voz'}
+        onClose={() => setActiveTool(null)}
+      />
+
+      {/* ── Asistente IA (controlado por activeTool) ── */}
+      <AsistenteIA
+        onFillForm={handleAsisApply}
+        isOpen={activeTool === 'ia'}
+        onClose={() => setActiveTool(null)}
+      />
 
       {/* ══ MODAL: VISTA PREVIA (igual estructura que el PHP) ══ */}
       {showPreviewModal && (
@@ -1001,29 +1020,29 @@ const handleSubmit = (e) => {
               <button type="button" className="btn-back" onClick={() => setShowPreviewModal(false)}>
                 <i className="fas fa-edit"></i> Editar
               </button>
-<button
-  type="button"
-  className="btn-submit"
-  onClick={(e) => {
-    e.stopPropagation();
-    setShowPreviewModal(false);
-    handleSubmit(e);
-  }}
->
-  <i className="fas fa-check"></i> Confirmar y enviar
-</button>
+              <button
+                type="button"
+                className="btn-submit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowPreviewModal(false);
+                  handleSubmit(e);
+                }}
+              >
+                <i className="fas fa-check"></i> Confirmar y enviar
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ══ MODAL: AYUDA ══ */}
-      {showHelpModal && (
-        <div className="modal-overlay" onClick={() => setShowHelpModal(false)}>
+      {/* ══ MODAL: AYUDA (controlado por activeTool === 'ayuda') ══ */}
+      {activeTool === 'ayuda' && (
+        <div className="modal-overlay" onClick={() => setActiveTool(null)}>
           <div className="modal-dialog" onClick={e => e.stopPropagation()}>
             <div className="modal-header-help">
               <h5><i className="fas fa-life-ring"></i> ¿Necesitas ayuda?</h5>
-              <button className="btn-close-modal" onClick={() => setShowHelpModal(false)}>
+              <button className="btn-close-modal" onClick={() => setActiveTool(null)}>
                 <i className="fas fa-times"></i>
               </button>
             </div>
@@ -1059,12 +1078,12 @@ const handleSubmit = (e) => {
             </div>
             <div className="modal-footer">
               <button
-  type="button"
-  className="btn-submit"
-  onClick={() => setShowPreviewModal(false)}
->
-  <i className="fas fa-check"></i> Entendido
-</button>
+                type="button"
+                className="btn-submit"
+                onClick={() => setActiveTool(null)}
+              >
+                <i className="fas fa-check"></i> Entendido
+              </button>
             </div>
           </div>
         </div>
